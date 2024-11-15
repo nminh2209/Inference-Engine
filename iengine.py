@@ -40,6 +40,20 @@ def evaluate_clause(clause, assignment):
     else:  
         return assignment[consequent]
 
+def truth_table(kb, query):
+    symbols = set(query)
+    for clause in kb:
+        antecedent, consequent = parse_clause(clause)
+        symbols.update(antecedent + [consequent])
+    symbols = list(symbols)
+
+    models_count = 0
+    for assignment in generate_truth_assignments(symbols):
+        if all(evaluate_clause(clause, assignment) for clause in kb):  
+            models_count += 1
+            if not assignment[query]: 
+                return "NO"
+    return f"YES: {models_count}"
 
 #--------------------------------------------------------------------------------------------------------------------- hminhpartaye
 
@@ -141,7 +155,7 @@ class BC(Chaining):
         return False
 
 
-import sys
+
 
 class Main:            
     filename = sys.argv[1]
@@ -149,24 +163,53 @@ class Main:
     
     print(sys.argv[1], sys.argv[2])
     
-    result = abcxyzgc.read_file(filename)
-    kb = result[0]
-    query = result[1]
+    kb, query = parse_file(filename)
+    
     print('This is the KB:', kb)
     print('This is the QUERY:', query)
 
     # Choose the appropriate inference method based on input
     if method.lower() == 'fc':
-        algorithm = FC(kb, query)                         
+        algorithm = FC(kb, query) 
+        algorithm.CheckEntails()                         
     elif method.lower() == 'bc':
-        algorithm = BC(kb, query)            
+        algorithm = BC(kb, query)
+        algorithm.CheckEntails()           
     elif method.lower() == 'tt':
-        algorithm = TT(kb, query)
+        result = truth_table(kb, query)
+        print(result)
 
     else:
         print('Error: Wrong search method input. Please check the command.')
         sys.exit()
             
-    algorithm.CheckEntails()    
+       
     sys.exit()
 
+
+'''
+def main():
+    filename = sys.argv[1]
+    method = sys.argv[2]
+    
+
+    kb, query = parse_file(filename)
+
+    if method.lower() == 'tt':
+        result = truth_table(kb, query)
+        print(result)
+    elif method.lower() == 'bc':
+        bc_engine = BC(kb, query)
+        bc_engine.CheckEntails()
+    elif method.lower() == 'fc':
+        algorithm = FC(kb, query)
+        algorithm.CheckEntails()
+    else:
+        print('Error: Wrong search method input. Please check the command.')
+        return
+    
+    
+
+if __name__ == "__main__":
+    main()
+'''

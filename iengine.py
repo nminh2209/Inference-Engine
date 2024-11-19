@@ -14,9 +14,10 @@ def parse_file(filename):
             elif line.startswith("ASK"):
                 mode = 'ASK'
             elif mode == 'TELL':  
-                clauses = line.split(";")  
+                clauses = line.split(";")
                 for clause in clauses:
-                    kb.append(clause.strip())  
+                    if clause.strip():  
+                        kb.append(clause.strip())
             elif mode == 'ASK' and line: 
                 query = line.strip()
     return kb, query
@@ -65,7 +66,7 @@ class Chaining:
     def FindSingleClause(self):
         self.queue = []
         for clause in self.kb:
-            if '=>' not in clause:
+            if '=>' not in clause and clause.strip():
                 self.queue.append(clause)
         return self.queue
 

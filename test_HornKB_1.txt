@@ -1,0 +1,4 @@
+TELL
+R&N => W
+ASK
+R   

@@ -1,0 +1,4 @@
+TELL
+(x => y) & (z => w); (w & y <=> p); p => q; r || s;   
+ASK
+q

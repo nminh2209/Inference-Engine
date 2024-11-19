@@ -153,6 +153,80 @@ class BC(Chaining):
                     return True
 
         return False
+    
+
+class DPLL:
+    def __init__(self, kb, query):
+            self.kb = kb
+            self.query = query
+    def CheckEntails(self):
+        result, model_count = self.dpll(self.kb, {})
+        if result:
+            print(f'YES: {model_count}')
+        else:
+            print('NO')
+
+    def convert_to_clauses(self, kb):
+        return [self.parse_clause(clause) for clause in kb]
+
+    def parse_clause(self, clause):
+        return [literal.strip() for literal in clause.split('|')]
+
+    def dpll(self, clauses, assignment):
+        if self.all_clauses_satisfied(clauses, assignment):
+            return True, 1
+        if self.any_clause_falsified(clauses, assignment):
+            return False, 0
+
+        unit_clauses = self.find_unit_clauses(clauses)
+        if unit_clauses:
+            unit = unit_clauses[0][0]
+            return self.dpll(self.simplify_clauses(clauses, unit), {**assignment, unit: True})
+
+        pure_literals = self.find_pure_literals(clauses)
+        if pure_literals:
+            pure_literal = next(iter(pure_literals))
+            return self.dpll(self.simplify_clauses(clauses, pure_literal), {**assignment, pure_literal: True})
+
+        literal = self.select_literal(clauses)
+        result_true, count_true = self.dpll(self.simplify_clauses(clauses, literal), {**assignment, literal: True})
+        result_false, count_false = self.dpll(self.simplify_clauses(clauses, f'-{literal}'), {**assignment, literal: False})
+        return (result_true or result_false), (count_true + count_false)
+
+    def simplify_clauses(self, clauses, literal):
+        simplified = []
+        for clause in clauses:
+            if literal not in clause:
+                filtered_clause = [lit for lit in clause if lit != f'-{literal}' and lit != literal[1:]]
+                simplified.append(filtered_clause)
+        return simplified
+
+    def evaluate_clause(self, clause, assignment):
+        for literal in clause:
+            if assignment.get(literal) is True:
+                return True
+            if assignment.get(f'-{literal}') is False:
+                return True
+        return None
+
+    def all_clauses_satisfied(self, clauses, assignment):
+        return all(self.evaluate_clause(clause, assignment) for clause in clauses)
+
+    def any_clause_falsified(self, clauses, assignment):
+        return any(self.evaluate_clause(clause, assignment) is False for clause in clauses)
+
+    def find_unit_clauses(self, clauses):
+        return [clause for clause in clauses if len(clause) == 1]
+
+    def find_pure_literals(self, clauses):
+        literals = {literal for clause in clauses for literal in clause}
+        return {literal for literal in literals if f'-{literal}' not in literals and literal[1:] not in literals}
+
+    def select_literal(self, clauses):
+        for clause in clauses:
+            for literal in clause:
+                return literal
+
 
 
 
@@ -178,7 +252,8 @@ class Main:
     elif method.lower() == 'tt':
         result = truth_table(kb, query)
         print(result)
-
+    elif method.lower() == 'dpll':
+        algorithm = DPLL(kb, query)
     else:
         print('Error: Wrong search method input. Please check the command.')
         sys.exit()

@@ -1,0 +1,4 @@
+TELL
+D=>P; P=>E; E=>K; K;
+ASK
+K  

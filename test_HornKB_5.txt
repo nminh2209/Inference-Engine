@@ -1,0 +1,4 @@
+TELL
+G => H; I & J => K; K => L;
+ASK  
+L

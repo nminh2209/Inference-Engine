@@ -1,4 +1,9 @@
 TELL
-A => B; B => A;
+A & B => C; C & D => E; E & F => G; G & H => I; I & J => K; K & L => M; M & N => O; O & P => Q; Q & R => S; S & T => U;
+U & V => W; W & X => Y; Y & Z => AA; AA & AB => AC; AC & AD => AE; AE & AF => AG; AG & AH => AI; AI & AJ => AK; AK & AL => AM;
+AM & AN => AO; AO & AP => AQ; AQ & AR => AS; AS & AT => AU; AU & AV => AW; AW & AX => AY; AY & AZ => BA; BA & BB => BC;
+BC & BD => BE; BE & BF => BG; BG & BH => BI; BI & BJ => BK;
+BK; C; E; G; I; K; M; O; Q; S; U; W; Y; AA; AC; AE; AG; AI; AK; AM; AO; AQ; AS; AU; AW; AY; BA; BC; BE; BG; BI;
 ASK
-A  
+BK
+   

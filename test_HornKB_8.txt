@@ -1,4 +1,5 @@
 TELL
-A; 
+A; B => C; D => E;
 ASK
-A   
+A
+ 

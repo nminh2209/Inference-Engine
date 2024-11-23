@@ -4,7 +4,7 @@ from itertools import product
 from tabulate import tabulate
 import re
 
-class TextFileAnalyzer:
+class TextFileAnalyzer: #
     def __init__(self, filename):
         self.filename = filename
 
@@ -50,7 +50,7 @@ class TextFileAnalyzer:
 
         return kb, query
 
-class TT:
+class TT: #Implement the truth table 
     def __init__(self, kb, query):
         self.model_list = []
         self.kb = kb
@@ -161,7 +161,7 @@ class TT:
 
 #--------------------------------------------------------------------------------------------------------------------- hminhpartaye
 
-class Chaining:
+class Chaining: #Base class for FC and BC
     def __init__(self, kb, query): 
         self.kb = kb
         self.query = query

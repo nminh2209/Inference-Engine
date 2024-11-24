@@ -1,41 +1,89 @@
-import sys
-import os
+#This is the main file for the iengine.py
+#Author: Nguyen Hoang Minh (104972886)  & Le Hoang Minh (104656973)
+
+
+
+
+
+
+
+import sys #this is used mainly for reading text file and handle data in it
+import os #this is used for handling error related to path file
 from itertools import product
 from tabulate import tabulate
 import re
 
-class TextFileAnalyzer: #
+''' 
+    If the 'tabulate' module is not installed, you can install it using:
+    pip install tabulate
+ Use the following command to run the program:
+      python .\iengine.py .\test_HornKB.txt TT
+    This is the logic:
+    1. Open the file
+    2. Locate the position of 'TELL' and 'ASK' keywords in the content
+    3. Extract the knowledge base (KB) portion after 'TELL' and before 'ASK'
+    4. Extract the query portion after 'ASK'
+    5. Split the KB content into individual clauses based on ';' and strip each clause
+    6. Return the extracted knowledge base, query
+    Status: Working well
+'''
+
+class TextFileAnalysis: 
+    '''
+    Purpose: This class handles the reading and parsing of a file that contains the knowledge base (KB) and query.
+            
+            Constructor (__init__): Initializes the class with the filename.
+            
+        read_file Method:
+
+        Reads the content of the specified file and checks if the file is valid (i.e., it exists and has the correct format).
+
+        Extracts the knowledge base (KB) content and the query from the file.
+
+        Returns a list of clauses in the KB and the query to be used by the inference algorithms.
+        
+        '''
+    
     def __init__(self, filename):
         self.filename = filename
 
     def read_file(filename):
+    # Check if the number of arguments passed is correct.
         if len(sys.argv) != 3:
             print('Error: You need to use the following format "python iengine.py <filename> <method>".')
             sys.exit()
 
+        # Check if the file exists.
         if not os.path.exists(filename):
             print('Error: The map file does not exist. Please check the file path.')
             sys.exit()
 
+        # Read the content of the file.
         with open(filename, 'r') as file:
             content = file.read()
 
+        # Find where the TELL and ASK sections start.
         tell_index = content.find('TELL')
         ask_index = content.find('ASK')
 
+        # If TELL or ASK sections are missing, print an error.
         if tell_index == -1 or ask_index == -1:
             print('Error: The file content is not formatted correctly. Please check the file content.')
             sys.exit()
 
+        # Extract KB content and the query.
         kb_content = content[tell_index + 4:ask_index].strip()
         query = content[ask_index + 3:].strip()
 
+        # Validate that both KB and query are non-empty.
         if not kb_content or not query:
             print('Error: The file content is not formatted correctly. Please check the file content.')
             sys.exit()
 
+        # Split KB content into individual clauses.
         kb = [clause.strip() for clause in kb_content.split(';') if clause.strip()]
 
+        # Check if the method provided is supported.
         if sys.argv[2].lower() not in ["tt", "dpll"]:
             additional_connectives = ['<=>', '||', '~']
             symbol_set = set()
@@ -50,7 +98,28 @@ class TextFileAnalyzer: #
 
         return kb, query
 
-class TT: #Implement the truth table 
+
+class TT: 
+    '''
+    TT Class
+        Purpose: This class implements the Truth Table (TT) algorithm to check if the knowledge base (KB) entails the query.
+
+        Constructor (__init__): Initializes the class with KB and query.
+
+        ExtractSymbols Method: Extracts all unique symbols from the KB.
+
+        CheckEntails Method: Calls CreateTruthTable to check if the KB entails the query and prints the result.
+
+        CreateTruthTable Method: Creates a truth table based on the symbols and evaluates each model for consistency with the KB and query.
+        
+        Check_if_kb_true and Check_if_clause_true Methods: Check if the KB and individual clauses evaluate to true for a given model.
+        
+        EvaluateClause Method: Evaluates logical clauses using operators like AND, OR, NOT, and IMPLIES.
+        
+        FindMainOperator Method: Identifies the main logical operator in a clause.
+        
+        '''
+
     def __init__(self, kb, query):
         self.model_list = []
         self.kb = kb
@@ -162,6 +231,13 @@ class TT: #Implement the truth table
 #--------------------------------------------------------------------------------------------------------------------- hminhpartaye
 
 class Chaining: #Base class for FC and BC
+    '''
+    Purpose: This is a base class for both forward and backward chaining algorithms. It prepares the KB for inference and holds common methods.
+
+    FindSingleClause Method: Finds all clauses without implication (i.e., =>).
+
+    GenerateSentenceList Method: Generates a list of sentences that have implications (=>), separating premises and conclusions.
+    '''
     def __init__(self, kb, query): 
         self.kb = kb
         self.query = query
@@ -260,6 +336,15 @@ class BC(Chaining):
     
 
 class DPLL:
+    '''
+    Purpose: Implements the DPLL (Davis-Putnam-Logemann-Loveland) algorithm for satisfiability checking, a more efficient method than truth tables.
+
+    CheckEntails Method: Calls the DPLL algorithm to check if the KB entails the query.
+
+    dpll Method: Implements the core DPLL algorithm, recursively trying to assign truth values to literals.
+
+    simplify_clauses Method: Simplifies the clauses by removing literals that have been assigned truth values.
+    '''
     def __init__(self, kb, query):
             self.kb = kb
             self.query = query
@@ -339,7 +424,7 @@ class Main:
         method = sys.argv[2] 
         print(sys.argv[1], sys.argv[2]) 
         
-        result = TextFileAnalyzer.read_file(filename)
+        result = TextFileAnalysis.read_file(filename)
         kb = result[0]
         query = result[1]
         print ('This is the KB: ',kb)
@@ -363,61 +448,4 @@ class Main:
             
         algorithm.CheckEntails()    
         sys.exit()
-''''
-class Main:            
-    filename = sys.argv[1]
-    method = sys.argv[2]
-    
-    print(sys.argv[1], sys.argv[2])
-    
-    kb, query = parse_file(filename)
-    
-    print('This is the KB:', kb)
-    print('This is the QUERY:', query)
 
-    # Choose the appropriate inference method based on input
-    if method.lower() == 'fc':
-        algorithm = FC(kb, query) 
-        algorithm.CheckEntails()                         
-    elif method.lower() == 'bc':
-        algorithm = BC(kb, query)
-        algorithm.CheckEntails()           
-    elif method.lower() == 'tt':
-        result = truth_table(kb, query)
-        print(result)
-    elif method.lower() == 'dpll':
-        algorithm = DPLL(kb, query)
-    else:
-        print('Error: Wrong search method input. Please check the command.')
-        sys.exit()
-            
-       
-    sys.exit()
-
-
-''''''
-def main():
-    filename = sys.argv[1]
-    method = sys.argv[2]
-    
-
-    kb, query = parse_file(filename)
-
-    if method.lower() == 'tt':
-        result = truth_table(kb, query)
-        print(result)
-    elif method.lower() == 'bc':
-        bc_engine = BC(kb, query)
-        bc_engine.CheckEntails()
-    elif method.lower() == 'fc':
-        algorithm = FC(kb, query)
-        algorithm.CheckEntails()
-    else:
-        print('Error: Wrong search method input. Please check the command.')
-        return
-    
-    
-
-if __name__ == "__main__":
-    main()
-'''
